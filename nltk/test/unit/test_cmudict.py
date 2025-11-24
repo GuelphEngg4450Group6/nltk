@@ -47,7 +47,7 @@ def test_cmudict_ipa_all_sounds():
         #Changed read to road since read is a homonym
         "road"  :    ["r", "ˈoʊ", "d"], 
         "she"   :    ["ʃ", "ˈi"], 
-        "theta" :    ["θ", "ˈeɪ", "t", "ʌ"],
+        "theta" :    ["θ", "ˈeɪ", "t", "ə"],
         "two"   :    ["t", "ˈu"],
         "we"    :    ["w", "ˈi"],
         "zee"   :    ["z", "ˈi"],
