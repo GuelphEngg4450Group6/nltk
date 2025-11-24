@@ -108,9 +108,9 @@ def read_cmudict_block_IPA(stream): #if user wants IPA conversion, use this bloc
         # print(pieces[2:])
         # print("\n")
         temp_phones = arpaToIpa(pieces[2:])
-        for p in temp_phones:
-            if p == "ˈə":
-                p = "ˈʌ"  #Often considered allophones, ə and ʌ might be considered interchangeable. Tpyically, however, ə is used in unstressed syllables while ʌ is used in stressed syllables. Here, we convert all ə to ʌ for simplicity.
+        for i in range(len(temp_phones)):
+            if temp_phones[i] == "ˈə":  #Often considered allophones in English, ə and ʌ are somewhat interchangeable.
+                temp_phones[i] = "ˈʌ"   #Typically, however, ə is used in unstressed syllables while ʌ is used in stressed syllables.
         entries.append((pieces[0].lower(), temp_phones))
     return entries
 
