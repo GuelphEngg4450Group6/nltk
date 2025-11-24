@@ -51,33 +51,41 @@ from nltk.util import Index
 
 
 class CMUDictCorpusReader(CorpusReader):
-    def entries(self):
+    def entries(self, transcription_format: str = "ARPA"):
         """
         :return: the cmudict lexicon as a list of entries
             containing (word, transcriptions) tuples.
         """
-        return concat(
-            [
-                StreamBackedCorpusView(fileid, read_cmudict_block, encoding=enc)
-                for fileid, enc in self.abspaths(None, True)
-            ]
-        )
+        if transcription_format == "IPA":
+            return concat(
+                [
+                    StreamBackedCorpusView(fileid, read_cmudict_block_IPA, encoding=enc)
+                    for fileid, enc in self.abspaths(None, True)
+                ]
+            )
+        else:
+            return concat(
+                [
+                    StreamBackedCorpusView(fileid, read_cmudict_block, encoding=enc)
+                    for fileid, enc in self.abspaths(None, True)
+                ]
+            )
 
-    def words(self):
+    def words(self, transcription_format: str = "ARPA"):
         """
         :return: a list of all words defined in the cmudict lexicon.
         """
-        return [word.lower() for (word, _) in self.entries()]
+        return [word.lower() for (word, _) in self.entries(transcription_format)]
 
-    def dict(self):
+    def dict(self, transcription_format: str = "ARPA"):
         """
         :return: the cmudict lexicon as a dictionary, whose keys are
             lowercase words and whose values are lists of pronunciations.
         """
-        return dict(Index(self.entries()))
+        return dict(Index(self.entries(transcription_format)))
 
 
-def read_cmudict_block(stream):
+def read_cmudict_block(stream): #default, ARPA transcription mode
     entries = []
     while len(entries) < 100:  # Read 100 at a time.
         line = stream.readline()
@@ -85,4 +93,127 @@ def read_cmudict_block(stream):
             return entries  # end of file.
         pieces = line.split()
         entries.append((pieces[0].lower(), pieces[2:]))
+        # print(entries);
     return entries
+
+def read_cmudict_block_IPA(stream): #if user wants IPA conversion, use this block reader
+    entries = []
+    while len(entries) < 100:  # Read 100 at a time.
+        line = stream.readline()
+        if line == "":
+            return entries  # end of file.
+        pieces = line.split() 
+        # print(pieces[0].lower())
+        # print("\n")
+        # print(pieces[2:])
+        # print("\n")
+        temp_phones = arpaToIpa(pieces[2:])
+        for p in temp_phones:
+            if p == "ˈə":
+                p = "ˈʌ"  #Often considered allophones, ə and ʌ might be considered interchangeable. Tpyically, however, ə is used in unstressed syllables while ʌ is used in stressed syllables. Here, we convert all ə to ʌ for simplicity.
+        entries.append((pieces[0].lower(), temp_phones))
+    return entries
+
+def arpaToIpa(arpa_phonemes):
+    st_map = {
+        "0": "",  #no stress
+        "1": "ˈ", #primary stress
+        "2": "ˌ"  #secondary stress
+    }
+    ph_map = {  #phoneme mappings
+        "AA": "ɑ",
+        "AE": "æ",
+        "AH": "ə",
+        "AO": "ɔ",
+        "AW": "aʊ",
+        "AY": "aɪ",
+        "B": "b",
+        "CH": "tʃ",
+        "D": "d",
+        "DH": "ð",
+        "EH": "ɛ",
+        "ER": "ɚ",
+        "EY": "eɪ",
+        "F": "f",
+        "G": "ɡ",
+        "HH": "h",
+        "IH": "ɪ",
+        "IY": "i",
+        "JH": "dʒ",
+        "K": "k",
+        "L": "l",
+        "M": "m",
+        "N": "n",
+        "NG": "ŋ",
+        "OW": "oʊ",
+        "OY": "ɔɪ",
+        "P": "p",
+        "R": "r",
+        "S": "s",
+        "SH": "ʃ",
+        "T": "t",
+        "TH": "θ",
+        "UH": "ʊ",
+        "UW": "u",
+        "V": "v",
+        "W": "w",
+        "Y": "j",
+        "Z": "z",
+        "ZH": "ʒ"
+    }
+
+    # print(type(arpa_phonemes));
+    if type(arpa_phonemes) is str:
+        ph = str("")  #string for current phoneme
+        temp_ph = str("") #temporary holder for phoneme without stress marker
+        if '0' in arpa_phonemes:
+            temp_ph = arpa_phonemes[:-1]  #removes unstressed vowel marker
+            ph = ""
+        elif '1' in arpa_phonemes:
+            temp_ph = arpa_phonemes[:-1]  #removes primary stress marker,
+            ph = "\ˈ";                  #adds IPA primary stress marker at beginning of phoneme
+        elif '2' in arpa_phonemes:
+            temp_ph = arpa_phonemes[:-1]  #removes secondary stress marker
+            ph = "\ˌ";                  #adds IPA secondary stress marker at beginning of phoneme
+
+        if temp_ph in ph_map:            
+            ph = ph + (ph_map[temp_ph]) #appends corresponding IPA phoneme to stress marker (if one exists)
+        else:
+            ph = ph + "???"
+        return ph
+    elif type(arpa_phonemes) is list: 
+        # print(arpa_phonemes)
+        l = list()
+        ph = str("")  
+        temp_ph = str("") 
+        for phone in arpa_phonemes:    
+            if '0' in phone:
+                temp_ph = phone[:-1]  #removes unstressed vowel marker
+                ph = ""
+            elif '1' in phone:
+                temp_ph = phone[:-1]  #removes primary stress marker,
+                ph = "ˈ"                  #adds IPA primary stress marker at beginning of phoneme
+            elif '2' in phone:
+                temp_ph = phone[:-1]  #removes secondary stress marker
+                ph = "ˌ"                  #adds IPA secondary stress marker at beginning of phoneme
+            else:
+                temp_ph = phone
+                ph = ""
+
+            if temp_ph in ph_map:            
+                ph = ph + (ph_map[temp_ph]) #appends corresponding IPA phoneme to stress marker (if one exists)
+            else:
+                ph = ph + "???"             #if unknown ARPA symbol, write "???" as placeholder
+            # print(ph)
+            l.append(ph)
+        return l
+    else:
+        print("Please provide either a string or a list of strings composed of ARPAbet phonemes as input.")
+        return None
+
+    #['C:\\Users\\LENOVO\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Roaming\\nltk_data']
+
+def phonesToWord():
+    print("f")
+def tokByPhone():
+    print("f")
