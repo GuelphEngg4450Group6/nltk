@@ -85,8 +85,12 @@ class CMUDictCorpusReader(CorpusReader):
         return dict(Index(self.entries(transcription_format)))
     
     def phones_to_word(self, phones: list, transcription_format: str = "ARPA"):
-        print("f")
-
+        d = self.dict(transcription_format).items()
+        l = list()
+        for word, pronunc in d:
+            if phones in pronunc:
+                l.append(word)
+        return l
         
 
 
