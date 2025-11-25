@@ -48,6 +48,7 @@ ZH      seizure S IY ZH ER
 from nltk.corpus.reader.api import *
 from nltk.corpus.reader.util import *
 from nltk.util import Index
+from nltk import tokenize
 
 
 class CMUDictCorpusReader(CorpusReader):
@@ -85,17 +86,33 @@ class CMUDictCorpusReader(CorpusReader):
         return dict(Index(self.entries(transcription_format)))
     
     def phones_to_word(self, phones: list, transcription_format: str = "ARPA"):
-        d = self.dict(transcription_format).items()
+        """
+        :return: a list of all words with matching pronunciations (exact match required).
+        """
+        d = self.dict(transcription_format).items() #get dictionary items
         l = list()
-        for word, pronunc in d:
-            if phones in pronunc:
-                l.append(word)
+        for word, pronunc in d: #iterate through dictionary
+            if phones in pronunc:   #check each IPA transcription for match
+                l.append(word)      #add words corresponding to sound matches to output list
         return l
+
+    def tok_by_phone(self, words: str, transcription_format: str = "ARPA"):
+        """
+        :return: a set of all the sounds used in the passed-in sentence/word.
+        """
+        invalidWords = list()
+        phones = list()
+        toks = tokenize.word_tokenize(words)
+        for w in toks:
+            try:
+                t = self.dict(transcription_format)[w.lower()][0] #just take first pronunciation for each word
+                for p in t:
+                    print(p)
+                    phones.append(p)  
+            except KeyError as e:
+                invalidWords.append(w)
+        return [list(set(phones)), invalidWords]    #emove duplicates with set conversion
         
-
-
-    def tok_by_phone():
-        print("f")
 
 
 def read_cmudict_block(stream): #default, ARPA transcription mode
@@ -223,6 +240,3 @@ def arpa_to_ipa(arpa_phonemes):
     else:
         print("Please provide either a string or a list of strings composed of ARPAbet phonemes as input.")
         return None
-
-    #['C:\\Users\\LENOVO\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Roaming\\nltk_data']
-

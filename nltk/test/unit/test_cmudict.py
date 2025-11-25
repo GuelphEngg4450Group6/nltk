@@ -85,3 +85,12 @@ def test_phones_to_word():
     c = cmu.CMUDictCorpusReader(nltk.data.find("corpora/cmudict"), "cmudict")
     words = c.phones_to_word(ph, "IPA")
     assert "potato" in words
+
+def test_tok_by_phone():
+    words = "Hello world, this is a test, ppoottaattooeess."
+    c = cmu.CMUDictCorpusReader(nltk.data.find("corpora/cmudict"), "cmudict")
+    #get list of sounds, throw out list of unrecognized words:
+    sounds = c.tok_by_phone(words, "IPA")[0]
+    expected_sounds = {'h', 'ə', 'l', 'ˈoʊ', 'w', 'ˈɚ', 'l', 'd', 'ð', 'ˈɪ', 's', 'z', 't', 'ˈɛ'}
+    for s in expected_sounds:
+        assert s in sounds
