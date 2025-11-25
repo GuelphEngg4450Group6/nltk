@@ -98,20 +98,23 @@ class CMUDictCorpusReader(CorpusReader):
 
     def tok_by_phone(self, words: str, transcription_format: str = "ARPA"):
         """
-        :return: a set of all the sounds used in the passed-in sentence/word.
+        :return: a list containing the set of all the sounds used in the passed-in sentence/word, and the list of words not found in the cmudict corpus.
+        Remember to specify "IPA" as transcription_format if you want IPA transcriptions, otherwise you get ARPA
+        Remember to look at the first element (i.e. tok_by_phone(...)[0]) if you only care about the set of phonemes.
         """
         invalidWords = list()
         phones = list()
-        toks = tokenize.word_tokenize(words)
+        toks = tokenize.word_tokenize(words)    #tokenize words with default NLTK tokenizer
         for w in toks:
             try:
                 t = self.dict(transcription_format)[w.lower()][0] #just take first pronunciation for each word
-                for p in t:
-                    print(p)
-                    phones.append(p)  
+                for p in t: 
+                    # print(p)
+                    phones.append(p)    #add each sound to our list of phonemes
             except KeyError as e:
-                invalidWords.append(w)
-        return [list(set(phones)), invalidWords]    #emove duplicates with set conversion
+                invalidWords.append(w)  #keep track of words not recognized by cmudict corpus
+        return [list(set(phones)), invalidWords]    #remove duplicates with set conversion.
+                                                    #return set of sounds and list of unrecognized words. 
         
 
 
