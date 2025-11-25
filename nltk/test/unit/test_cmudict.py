@@ -5,7 +5,6 @@ from nltk.corpus.reader import cmudict as cmu
 
 #unit tests for the cmudict corpus reader, particularly IPA transcription additions
 
-
 def test_cmudict_ipa_all_sounds():
     #Testing a few words for their IPA transcriptions
     word_ipa_pairs = {
@@ -68,14 +67,21 @@ def test_cmudict_ipa_example():
 
 
 def test_cmudict_ipa_mid_vowels():
-    #The word bubble has both the /ə/ and /ʌ/ sounds, differentiated here by stress on the initial one. Arpa represents these the same but with stress numbers.
+    #The word bubble has both the /ə/ and /ʌ/ sounds, differentiated here by stress on the initial one. ARPA represents these the same but with stress numbers.
     ph = ["b", "ˈʌ", "b", "ə", "l"]
     c = cmu.CMUDictCorpusReader(nltk.data.find("corpora/cmudict"), "cmudict")
     phones = c.dict("IPA")["bubble"][0]
     assert phones == ph
 
 def test_cmudict_ipa_multi_stress():    
+    #the word "recriation" has primary, secondary, and "unstressed" syllables.
     ph = ["r", "ˌɛ", "k", "r", "i", "ˈeɪ", "ʃ", "ə", "n"]
     c = cmu.CMUDictCorpusReader(nltk.data.find("corpora/cmudict"), "cmudict")
     phones = c.dict("IPA")["recreation"][0]
     assert phones == ph
+
+def test_phones_to_word():
+    ph = ["p", "ə", "t", "ˈeɪ", "t", "ˌoʊ"]
+    c = cmu.CMUDictCorpusReader(nltk.data.find("corpora/cmudict"), "cmudict")
+    words = c.phones_to_word(ph, "IPA")
+    assert "potato" in words

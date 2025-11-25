@@ -83,6 +83,15 @@ class CMUDictCorpusReader(CorpusReader):
             lowercase words and whose values are lists of pronunciations.
         """
         return dict(Index(self.entries(transcription_format)))
+    
+    def phones_to_word(self, phones: list, transcription_format: str = "ARPA"):
+        print("f")
+
+        
+
+
+    def tok_by_phone():
+        print("f")
 
 
 def read_cmudict_block(stream): #default, ARPA transcription mode
@@ -107,14 +116,14 @@ def read_cmudict_block_IPA(stream): #if user wants IPA conversion, use this bloc
         # print("\n")
         # print(pieces[2:])
         # print("\n")
-        temp_phones = arpaToIpa(pieces[2:])
+        temp_phones = arpa_to_ipa(pieces[2:])
         for i in range(len(temp_phones)):
             if temp_phones[i] == "ˈə":  #Often considered allophones in English, ə and ʌ are somewhat interchangeable.
                 temp_phones[i] = "ˈʌ"   #Typically, however, ə is used in unstressed syllables while ʌ is used in stressed syllables.
         entries.append((pieces[0].lower(), temp_phones))
     return entries
 
-def arpaToIpa(arpa_phonemes):
+def arpa_to_ipa(arpa_phonemes):
     st_map = {
         "0": "",  #no stress
         "1": "ˈ", #primary stress
@@ -213,7 +222,3 @@ def arpaToIpa(arpa_phonemes):
 
     #['C:\\Users\\LENOVO\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\Roaming\\nltk_data']
 
-def phonesToWord():
-    print("f")
-def tokByPhone():
-    print("f")
