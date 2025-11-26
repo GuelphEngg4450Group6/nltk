@@ -49,6 +49,7 @@ from nltk.corpus.reader.api import *
 from nltk.corpus.reader.util import *
 from nltk.util import Index
 from nltk import tokenize
+import re
 
 
 class CMUDictCorpusReader(CorpusReader):
@@ -104,7 +105,7 @@ class CMUDictCorpusReader(CorpusReader):
         """
         invalidWords = list()
         phones = list()
-        toks = tokenize.word_tokenize(words)    #tokenize words with default NLTK tokenizer
+        toks = re.findall(r"[A-Za-z']+", words)    #tokenize words with default NLTK tokenizer
         for w in toks:
             try:
                 t = self.dict(transcription_format)[w.lower()][0] #just take first pronunciation for each word
@@ -203,11 +204,11 @@ def arpa_to_ipa(arpa_phonemes):
             temp_ph = arpa_phonemes[:-1]  #removes unstressed vowel marker
             ph = ""
         elif '1' in arpa_phonemes:
-            temp_ph = arpa_phonemes[:-1]  #removes primary stress marker,
-            ph = "\ˈ";                  #adds IPA primary stress marker at beginning of phoneme
+            temp_ph = arpa_phonemes[:-1]
+            ph = "ˈ"                  # IPA primary stress
         elif '2' in arpa_phonemes:
-            temp_ph = arpa_phonemes[:-1]  #removes secondary stress marker
-            ph = "\ˌ";                  #adds IPA secondary stress marker at beginning of phoneme
+            temp_ph = arpa_phonemes[:-1]
+            ph = "ˌ"                  # IPA secondary stress              
 
         if temp_ph in ph_map:            
             ph = ph + (ph_map[temp_ph]) #appends corresponding IPA phoneme to stress marker (if one exists)
